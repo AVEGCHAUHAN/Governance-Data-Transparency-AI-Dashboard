@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Governance Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#eef2f7;
+}
+html{ scroll-behavior:smooth; }
+
+.header{
+    background:#154c9c;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 40px;
+    position:sticky;
+    top:0;
+    z-index:1000;
+    box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+.header nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:bold;
+}
+
+#home, #dashboard, #about, #contact{
+    scroll-margin-top:90px;
+}
+
+.hero{
+    text-align:center;
+    margin-top:60px;
+}
+.hero h2{ color:#154c9c; font-size:42px; }
+.hero p{ font-size:20px; color:#555; max-width:700px; margin:15px auto; }
+.hero button{
+    background:#154c9c;
+    color:white;
+    padding:15px 35px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:18px;
+    transition:.3s;
+}
+.hero button:hover{ background:#0b3570; transform:scale(1.05); }
+
+.logo-box{
+    width:100px;
+    height:100px;
+    margin:20px auto;
+    border-radius:50%;
+    background:linear-gradient(135deg,#154c9c,#2f80ed);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:55px;
+    color:white;
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+}
+
+.cards{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    flex-wrap:wrap;
+    margin:50px;
+}
+.util-box{
+    width:80%;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0px 2px 10px rgba(0,0,0,.2);
+}
+.card{
+    width:250px;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    color:white;
+    transition:0.3s;
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+}
+.card:hover{ transform:translateY(-8px); }
+.budget{ background:linear-gradient(135deg,#1abc9c,#16a085); }
+.spent{ background:linear-gradient(135deg,#e74c3c,#c0392b); }
+.remaining{ background:linear-gradient(135deg,#f39c12,#f1c40f); }
+.department{ background:linear-gradient(135deg,#3498db,#2980b9); }
+.card h2{ font-size:38px; }
+.card p{ font-size:20px; }
+
+.info-section{
+    width:80%;
+    margin:40px auto;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+.info-card{
+    flex:1;
+    min-width:220px;
+    background:white;
+    padding:20px;
+    text-align:center;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    transition:.3s;
+}
+.info-card:hover{ transform:translateY(-6px); }
+.info-card h3{ color:#154c9c; }
+.download-btn{
+    background:#154c9c;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+.download-btn:hover{ background:#0b3570; }
+
+.search-section{ width:80%; margin:40px auto; text-align:center; }
+.search-section h2{ color:#154c9c; }
+.search-section input{
+    width:60%;
+    padding:12px;
+    font-size:16px;
+    border:2px solid #154c9c;
+    border-radius:5px;
+    outline:none;
+}
+
+.table-section{ width:80%; margin:50px auto; }
+.table-section h2{ text-align:center; color:#154c9c; }
+table{ width:100%; border-collapse:collapse; background:white; }
+th{ background:#154c9c; color:white; padding:12px; }
+td{ padding:12px; text-align:center; border:1px solid #ddd; }
+tr:nth-child(even){ background:#f5f5f5; }
+tr:hover{ background:#dff1ff; transition:.3s; }
+.good{ color:green; font-weight:bold; }
+.warning{ color:orange; font-weight:bold; }
+
+.charts-section{
+    width:80%;
+    margin:50px auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.charts-section h2{ text-align:center; color:#154c9c; margin-bottom:25px; }
+.charts-grid{ display:flex; gap:30px; flex-wrap:wrap; }
+.chart-box{
+    flex:1;
+    min-width:320px;
+    background:#f8fbff;
+    border-radius:10px;
+    padding:20px;
+}
+.chart-box h3{ text-align:center; color:#154c9c; margin-bottom:10px; font-size:18px; }
+.chart-canvas-wrap{ position:relative; height:320px; width:100%; }
+
+.progress-section{
+    width:80%;
+    margin:50px auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0px 2px 10px rgba(0,0,0,.1);
+}
+.progress-section h2{ text-align:center; color:#154c9c; margin-bottom:30px; }
+.progress-box p{ font-weight:bold; margin:15px 0 8px; }
+.progress{
+    width:100%;
+    height:22px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+.progress-fill{ height:100%; border-radius:20px; transition:width .4s ease; }
+
+.ai-analysis{
+    width:80%;
+    margin:50px auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.ai-analysis h2{ text-align:center; color:#154c9c; margin-bottom:25px; }
+.ai-box{
+    background:#f8fbff;
+    border-left:6px solid #154c9c;
+    padding:20px;
+    border-radius:8px;
+}
+.ai-box p{ font-size:18px; line-height:32px; }
+
+.about, .contact, .objectives, .features, .future{
+    width:80%;
+    margin:40px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0px 2px 10px rgba(0,0,0,0.1);
+}
+.about h2, .contact h2, .objectives h2, .features h2, .future h2{
+    text-align:center;
+    color:#154c9c;
+}
+.about p{ font-size:17px; line-height:28px; text-align:justify; }
+.contact p{ font-size:18px; line-height:30px; }
+.objectives ul, .features ul, .future ul{ font-size:18px; line-height:35px; }
+
+.footer{
+    background:#154c9c;
+    color:white;
+    text-align:center;
+    padding:20px;
+    margin-top:50px;
+}
+
+.loading-screen{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#154c9c,#2f80ed);
+    color:white;
+}
+.loading-screen h1{ font-size:45px; margin-bottom:20px; }
+.loading-screen p{ font-size:22px; animation:blink 1s infinite; }
+@keyframes blink{ 0%{opacity:1;} 50%{opacity:.3;} 100%{opacity:1;} }
+
+@media screen and (max-width:768px){
+    .header{ flex-direction:column; text-align:center; padding:20px; }
+    .header nav{ margin-top:15px; }
+    .header nav a{ display:block; margin:10px 0; }
+    .hero h2{ font-size:28px; }
+    .hero p{ font-size:16px; padding:0 15px; }
+    .cards{ flex-direction:column; align-items:center; }
+    .card{ width:90%; }
+    .info-section{ flex-direction:column; }
+    .search-section input{ width:90%; }
+    .table-section{ width:95%; overflow-x:auto; }
+    .about, .contact, .objectives, .features, .future,
+    .progress-section, .ai-analysis, .charts-section{ width:95%; }
+    .charts-grid{ flex-direction:column; }
+    table{ min-width:600px; }
+    .footer{ font-size:14px; padding:15px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-screen">
+  <h1>🏛 Governance Dashboard</h1>
+  <p>Loading...</p>
+</div>
+
+<div id="app" style="display:none;">
+
+<header class="header">
+  <h1>🏛 <span style="color:#FFD700">Governance</span> Dashboard</h1>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <div class="logo-box">🏛</div>
+  <h2>Public Spending Transparency Dashboard</h2>
+  <p>A clear, data-driven view of how public funds are allocated and spent across
+     government departments — built to make budget utilization easy for every
+     citizen to track and understand.</p>
+  <button onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">View Dashboard</button>
+</section>
+
+<section class="cards">
+  <div class="util-box">
+    <h2>📊 Budget Utilization</h2>
+    <h1 style="color:#154c9c" id="utilPct">--%</h1>
+    <p>Total Budget Utilized — FY 2025-26</p>
+  </div>
+
+  <div class="card budget"><h2 id="totalBudget">--</h2><p>Total Budget</p></div>
+  <div class="card spent"><h2 id="totalSpent">--</h2><p>Amount Spent</p></div>
+  <div class="card remaining"><h2 id="totalRemaining">--</h2><p>Remaining Budget</p></div>
+  <div class="card department"><h2 id="deptCount">--</h2><p>Departments</p></div>
+</section>
+
+<section class="info-section">
+  <div class="info-card"><h3>📅 Fiscal Year</h3><p>2025-26</p></div>
+  <div class="info-card"><h3>📍 Location</h3><p>Uttar Pradesh</p></div>
+  <div class="info-card">
+    <h3>📄 Report</h3>
+    <button class="download-btn" onclick="downloadReport()">Download Report</button>
+  </div>
+</section>
+
+<section class="search-section">
+  <h2>🔍 Search Department</h2>
+  <input type="text" id="searchInput" placeholder="Enter Department Name..." oninput="renderTable()" />
+</section>
+
+<section class="table-section" id="dashboard">
+  <h2>📊 Public Spending Details — FY 2025-26</h2>
+  <table>
+    <thead>
+      <tr><th>Department</th><th>Budget</th><th>Spent</th><th>Remaining</th><th>Status</th></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</section>
+
+<section class="charts-section">
+  <h2>📈 Visual Budget Breakdown</h2>
+  <div class="charts-grid">
+    <div class="chart-box">
+      <h3>Budget vs Spent by Department</h3>
+      <div class="chart-canvas-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>Share of Total Budget</h3>
+      <div class="chart-canvas-wrap"><canvas id="pieChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section class="progress-section">
+  <h2>📈 Budget Utilization by Department</h2>
+  <div class="progress-box" id="progressBox"></div>
+</section>
+
+<section class="ai-analysis">
+  <h2>🤖 AI Spending Analysis</h2>
+  <div class="ai-box" id="aiBox"></div>
+</section>
+
+<section class="about" id="about">
+  <h2>📖 About This Project</h2>
+  <p>The Governance – Data Transparency AI Dashboard improves transparency in
+     government public spending by presenting budget and expenditure data in a
+     clear, interactive format. It shows department-wise allocation, actual
+     spending, remaining balances, and overall financial performance for
+     FY 2025-26 at a glance.</p>
+  <p>The goal is to make public finance easy to follow for citizens, students,
+     and officials alike — turning raw budget figures into insights that support
+     accountability. Looking ahead, AI-driven analysis can help flag unusual
+     spending patterns early, forecast future budget needs, and support more
+     informed decisions in public governance.</p>
+</section>
+
+<section class="contact" id="contact">
+  <h2>📞 Contact Information</h2>
+  <p><strong>Email :</strong> support@govdashboard.in</p>
+  <p><strong>Department :</strong> Finance Department, Government of Uttar Pradesh</p>
+  <p><strong>Website :</strong> www.govdashboard.in</p>
+  <p><strong>Office Hours :</strong> Monday - Friday (9:00 AM - 5:00 PM)</p>
+</section>
+
+<section class="objectives">
+  <h2>🎯 Project Objectives</h2>
+  <ul>
+    <li>Improve transparency around how public funds are allocated and spent.</li>
+    <li>Present department-wise budgets in a clear, visual format.</li>
+    <li>Help citizens and officials quickly gauge spending efficiency.</li>
+    <li>Flag high-spending or underutilized departments early.</li>
+    <li>Deliver a simple, accessible dashboard usable without prior training.</li>
+  </ul>
+</section>
+
+<section class="features">
+  <h2>⭐ Key Features</h2>
+  <ul>
+    <li>✔ Real-time summary of total budget, spend, and remaining balance</li>
+    <li>✔ Department-wise breakdown across 6 sectors</li>
+    <li>✔ Interactive bar chart comparing budget vs. actual spend</li>
+    <li>✔ Pie chart showing each department's share of the total budget</li>
+    <li>✔ Searchable, filterable spending table</li>
+    <li>✔ Downloadable plain-text spending report</li>
+    <li>✔ AI-style narrative analysis of spending trends</li>
+  </ul>
+</section>
+
+<section class="future">
+  <h2>🚀 Future Scope</h2>
+  <ul>
+    <li>Connect to real government open-data APIs for live figures.</li>
+    <li>AI-based budget forecasting for upcoming fiscal years.</li>
+    <li>Year-over-year comparison charts across multiple fiscal years.</li>
+    <li>Exportable PDF reports with embedded charts.</li>
+    <li>Fully responsive mobile experience.</li>
+    <li>District-level and scheme-level drill-down views.</li>
+  </ul>
+</section>
+
+<footer class="footer">
+  <p>© 2026 Governance Dashboard | Social Internship Project</p>
+</footer>
+
+</div>
+
+<script>
+// ---------------- DEPARTMENT DATA (FY 2025-26, ₹ in Crore) ----------------
+// Total UP State Budget FY 2025-26: ₹8,08,736 Cr (Finance Minister Suresh Khanna, Feb 2025)
+// Education (13%), Agriculture (11%), Health (6%) are officially reported sectoral shares.
+// Roads, Police, and Environment do not have separately published official splits;
+// figures for these three are reasonable estimates based on typical state allocation patterns.
+// "Spent" figures are illustrative mid-year estimates — official actuals for FY 2025-26
+// will only be published as Revised Estimates in the next budget session.
+const departments = [
+  { name: "Education",   budget: 105136, spent: 82000, color: "#4CAF50" },
+  { name: "Health",      budget: 48524,  spent: 36000, color: "#2196F3" },
+  { name: "Roads",       budget: 64699,  spent: 58000, color: "#FF9800" },
+  { name: "Agriculture", budget: 88961,  spent: 62000, color: "#9C27B0" },
+  { name: "Police",      budget: 24262,  spent: 19500, color: "#009688" },
+  { name: "Environment", budget: 8087,   spent: 5000,  color: "#E91E63" },
+];
+
+const TOTAL_BUDGET = departments.reduce((s,d)=>s+d.budget,0);
+const TOTAL_SPENT = departments.reduce((s,d)=>s+d.spent,0);
+const TOTAL_REMAINING = TOTAL_BUDGET - TOTAL_SPENT;
+const UTILIZATION = Math.round((TOTAL_SPENT/TOTAL_BUDGET)*100);
+function fmt(n){ return n.toLocaleString("en-IN"); }
+
+function getStatus(pct){
+  if (pct >= 85) return { label:"High Spending", cls:"warning", icon:"🟡" };
+  if (pct <= 65) return { label:"Underutilized", cls:"warning", icon:"🟡" };
+  return { label:"Good", cls:"good", icon:"🟢" };
+}
+
+const departmentRows = departments.map(d=>{
+  const remaining = d.budget - d.spent;
+  const pct = Math.round((d.spent/d.budget)*100);
+  return { ...d, remaining, pct, status:getStatus(pct) };
+});
+
+function downloadReport(){
+  const deptLines = departmentRows.map((d,i)=>
+    `${i+1}. ${d.name} — Budget Rs.${fmt(d.budget)} Cr | Spent Rs.${fmt(d.spent)} Cr | Remaining Rs.${fmt(d.remaining)} Cr | Utilization ${d.pct}%`
+  ).join("\n");
+
+  const report = `
+Governance Dashboard Report — FY 2025-26
+-----------------------------------------
+
+Total Budget      : Rs.${fmt(TOTAL_BUDGET)} Cr
+Amount Spent      : Rs.${fmt(TOTAL_SPENT)} Cr
+Remaining Budget  : Rs.${fmt(TOTAL_REMAINING)} Cr
+Overall Utilization: ${UTILIZATION}%
+
+Department-wise Breakdown:
+${deptLines}
+
+AI Analysis:
+- Roads has the highest utilization and may need reallocation review.
+- Environment and Agriculture still have healthy reserves for FY 2025-26.
+- Education and Health are tracking close to planned utilization.
+- Overall budget utilization of ${UTILIZATION}% reflects steady execution across departments.
+
+Social Internship Project
+`;
+  const blob = new Blob([report], { type:"text/plain" });
+  const el = document.createElement("a");
+  el.href = URL.createObjectURL(blob);
+  el.download = "Governance_Report_2025-26.txt";
+  document.body.appendChild(el);
+  el.click();
+  document.body.removeChild(el);
+}
+
+function renderSummary(){
+  document.getElementById("utilPct").textContent = UTILIZATION + "%";
+  document.getElementById("totalBudget").textContent = "₹" + fmt(TOTAL_BUDGET) + " Cr";
+  document.getElementById("totalSpent").textContent = "₹" + fmt(TOTAL_SPENT) + " Cr";
+  document.getElementById("totalRemaining").textContent = "₹" + fmt(TOTAL_REMAINING) + " Cr";
+  document.getElementById("deptCount").textContent = departments.length;
+}
+
+function renderTable(){
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const rows = departmentRows.filter(d => d.name.toLowerCase().includes(search));
+  const tbody = document.getElementById("tableBody");
+  if (rows.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5">No department matches your search.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(d => `
+    <tr>
+      <td>${d.name}</td>
+      <td>₹${fmt(d.budget)} Cr</td>
+      <td>₹${fmt(d.spent)} Cr</td>
+      <td>₹${fmt(d.remaining)} Cr</td>
+      <td class="${d.status.cls}">${d.status.icon} ${d.status.label}</td>
+    </tr>
+  `).join("");
+}
+
+function renderProgress(){
+  const box = document.getElementById("progressBox");
+  box.innerHTML = departmentRows.map(d => `
+    <div>
+      <p>${d.name} (${d.pct}%)</p>
+      <div class="progress">
+        <div class="progress-fill" style="width:${d.pct}%; background:${d.color};"></div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderAI(){
+  const roadsPct = departmentRows.find(d=>d.name==="Roads").pct;
+  document.getElementById("aiBox").innerHTML = `
+    <p>📊 Overall budget utilization for FY 2025-26 stands at <strong>${UTILIZATION}%</strong>, indicating steady execution across departments.</p>
+    <p>⚠ <strong>Roads</strong> shows the highest utilization (${roadsPct}%), suggesting a need to monitor for potential budget overrun in the coming quarter.</p>
+    <p>✅ <strong>Education</strong> and <strong>Police</strong> are utilizing funds efficiently, tracking close to planned targets without major deviation.</p>
+    <p>💰 <strong>Environment</strong> and <strong>Agriculture</strong> retain the healthiest reserves, leaving room for reallocation if priorities shift.</p>
+    <p>🩺 <strong>Health</strong> spending remains balanced, with utilization aligned to seasonal program cycles.</p>
+    <p style="color:green">✔ Recommendation: Maintain current pace for most departments; review Roads' spending trajectory before the next budget cycle.</p>
+  `;
+}
+
+function renderCharts(){
+  new Chart(document.getElementById("barChart"), {
+    type: "bar",
+    data: {
+      labels: departmentRows.map(d=>d.name),
+      datasets: [
+        { label:"Budget", data: departmentRows.map(d=>d.budget), backgroundColor:"#154c9c" },
+        { label:"Spent", data: departmentRows.map(d=>d.spent), backgroundColor:"#f39c12" }
+      ]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{ legend:{ position:"top" } },
+      scales:{ y:{ title:{ display:true, text:"₹ Cr" } } }
+    }
+  });
+
+  new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+      labels: departmentRows.map(d=>d.name),
+      datasets: [{
+        data: departmentRows.map(d=>d.budget),
+        backgroundColor: departmentRows.map(d=>d.color)
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{ legend:{ position:"bottom" } }
+    }
+  });
+}
+
+// ---------------- INIT ----------------
+setTimeout(()=>{
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  renderSummary();
+  renderTable();
+  renderProgress();
+  renderAI();
+  renderCharts();
+}, 1500);
+</script>
+
+</body>
+</html>
